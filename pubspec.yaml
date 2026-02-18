@@ -1,0 +1,25 @@
+name: offline_sync_engine
+description: Offline-first CRDT-based sync engine with automatic conflict resolution. Seamlessly sync data across multiple devices with built-in implementations for quick start.
+version: 2.0.0
+repository: https://github.com/yourusername/offline_sync_engine
+homepage: https://github.com/yourusername/offline_sync_engine
+documentation: https://pub.dev/packages/offline_sync_engine
+issue_tracker: https://github.com/yourusername/offline_sync_engine/issues
+
+topics:
+  - offline
+  - sync
+  - crdt
+  - database
+  - multi-device
+
+environment:
+  sdk: ">=3.0.0 <4.0.0"
+
+dependencies:
+  meta: ^1.9.1
+
+dev_dependencies:
+  test: ^1.24.0
+  lints: ^3.0.0
+
