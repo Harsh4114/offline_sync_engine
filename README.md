@@ -20,11 +20,20 @@ Offline-first CRDT-based sync engine for Flutter and Dart applications. Automati
 
 ## Installation
 
-Add to your `pubspec.yaml`:
+```bash
+dart pub add offline_sync_engine
+```
+or 
+
+```bash
+flutter pub add offline_sync_engine
+```
+
+ your `pubspec.yaml` look like this :
 
 ```yaml
 dependencies:
-  offline_sync_engine: ^2.0.0
+  offline_sync_engine: 
 ```
 
 Then:
