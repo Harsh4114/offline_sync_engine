@@ -486,8 +486,8 @@ Copyright (c) 2026
 ## Support
 
 - 📖 [Documentation](https://pub.dev/packages/offline_sync_engine)
-- 💬 [Issues](https://github.com/yourusername/offline_sync_engine/issues)
-- ⭐ [GitHub](https://github.com/yourusername/offline_sync_engine)
+- 💬 [Issues](https://github.com/harsh4114/offline_sync_engine/issues)
+- ⭐ [GitHub](https://github.com/harsh4114/offline_sync_engine)
 
 ## Changelog
 
