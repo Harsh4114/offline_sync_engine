@@ -1,4 +1,3 @@
-import 'dart:math';
 import '../models/sync_operation.dart';
 import '../models/version_tracker.dart';
 import '../storage/database_adapter.dart';
@@ -26,15 +25,21 @@ class SyncManager {
   final String deviceId;
 
   bool _isSyncing = false;
+  int _opCounter = 0;
 
   SyncManager({
     required this.database,
     required this.cloud,
     required this.deviceId,
-  });
+  }) {
+    if (deviceId.trim().isEmpty) {
+      throw ArgumentError.value(deviceId, 'deviceId', 'must not be empty');
+    }
+  }
 
   String _generateOpId() {
-    return '${deviceId}_${DateTime.now().millisecondsSinceEpoch}_${Random().nextInt(1 << 16)}';
+    _opCounter += 1;
+    return '${deviceId}_${DateTime.now().microsecondsSinceEpoch}_$_opCounter';
   }
 
   /// Create or update a record with the given data
@@ -42,6 +47,9 @@ class SyncManager {
   /// This operation is recorded and will be synced to the cloud on next sync.
   Future<void> createOrUpdate(
       String recordId, Map<String, dynamic> data) async {
+    if (recordId.trim().isEmpty) {
+      throw ArgumentError.value(recordId, 'recordId', 'must not be empty');
+    }
     final record = await database.getRecord(recordId);
 
     // Create a copy of the version to avoid modifying the existing record
@@ -65,6 +73,9 @@ class SyncManager {
   ///
   /// The deletion is recorded and will be synced to cloud on next sync.
   Future<void> delete(String recordId) async {
+    if (recordId.trim().isEmpty) {
+      throw ArgumentError.value(recordId, 'recordId', 'must not be empty');
+    }
     final record = await database.getRecord(recordId);
     // Create a copy of the version to avoid modifying the existing record
     final version = record?.version != null

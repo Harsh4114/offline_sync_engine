@@ -40,7 +40,8 @@ class VersionTracker {
     return greater && smaller;
   }
 
-  Map<String, dynamic> toJson() => versions;
+  /// Returns an immutable JSON-safe copy of the current vector clock.
+  Map<String, dynamic> toJson() => Map<String, int>.from(versions);
 
   factory VersionTracker.fromJson(Map<String, dynamic> json) {
     return VersionTracker(Map<String, int>.from(json));
@@ -48,4 +49,25 @@ class VersionTracker {
 
   @override
   String toString() => 'VersionTracker($versions)';
+
+  /// Provides a stable ordering when two clocks are concurrent.
+  ///
+  /// Returns:
+  /// - positive if this tracker should win
+  /// - negative if [other] should win
+  /// - zero if equivalent
+  int compareDeterministically(VersionTracker other) {
+    final keys = <String>{...versions.keys, ...other.versions.keys}.toList()
+      ..sort();
+
+    for (final key in keys) {
+      final a = versions[key] ?? 0;
+      final b = other.versions[key] ?? 0;
+      if (a != b) {
+        return a.compareTo(b);
+      }
+    }
+
+    return 0;
+  }
 }
