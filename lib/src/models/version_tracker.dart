@@ -1,18 +1,19 @@
-/// Tracks versions across multiple devices to detect conflicts
+/// Tracks versions across multiple devices to detect conflicts.
 ///
-/// Uses vector clock algorithm to determine causality and concurrency
-/// between operations from different devices.
+/// This is a vector clock:
+/// - key   => deviceId
+/// - value => monotonic counter for that device
 class VersionTracker {
   final Map<String, int> versions;
 
   VersionTracker([Map<String, int>? versions]) : versions = versions ?? {};
 
-  /// Increment the version for a specific device
+  /// Increments the version for [deviceId].
   void increment(String deviceId) {
     versions[deviceId] = (versions[deviceId] ?? 0) + 1;
   }
 
-  /// Check if this version dominates (is newer than) another version
+  /// Returns true if this clock dominates [other] (>= on all entries in other).
   bool dominates(VersionTracker other) {
     for (final key in other.versions.keys) {
       if ((versions[key] ?? 0) < other.versions[key]!) {
@@ -22,10 +23,11 @@ class VersionTracker {
     return true;
   }
 
-  /// Check if this version is concurrent (conflicts) with another version
+  /// Returns true if this clock and [other] are concurrent.
+  /// Concurrent means neither dominates the other.
   bool isConcurrent(VersionTracker other) {
-    bool greater = false;
-    bool smaller = false;
+    var greater = false;
+    var smaller = false;
 
     final keys = {...versions.keys, ...other.versions.keys};
 

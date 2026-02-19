@@ -3,22 +3,13 @@ import '../models/version_tracker.dart';
 import '../storage/database_adapter.dart';
 import '../transport/cloud_adapter.dart';
 
-/// Main sync engine that manages offline-first data synchronization
+/// Main offline-first sync orchestrator.
 ///
-/// Handles conflict resolution using CRDT (Conflict-free Replicated Data Type)
-/// algorithms with vector clocks for deterministic merging across multiple devices.
-///
-/// Usage:
-/// ```dart
-/// final syncManager = SyncManager(
-///   database: myDatabaseAdapter,
-///   cloud: myCloudAdapter,
-///   deviceId: "device_123",
-/// );
-///
-/// await syncManager.createOrUpdate("user1", {"name": "John"});
-/// await syncManager.sync();
-/// ```
+/// Responsibilities:
+/// - create local operations
+/// - apply locally for instant offline UX
+/// - push unsent operations
+/// - pull remote operations and apply idempotently
 class SyncManager {
   final DatabaseAdapter database;
   final CloudAdapter cloud;
@@ -37,25 +28,27 @@ class SyncManager {
     }
   }
 
+  /// Generates operation IDs with timestamp + local counter.
   String _generateOpId() {
     _opCounter += 1;
     return '${deviceId}_${DateTime.now().microsecondsSinceEpoch}_$_opCounter';
   }
 
-  /// Create or update a record with the given data
+  /// Creates or updates a record.
   ///
-  /// This operation is recorded and will be synced to the cloud on next sync.
+  /// Operation is persisted locally and synced on next cycle.
   Future<void> createOrUpdate(
       String recordId, Map<String, dynamic> data) async {
     if (recordId.trim().isEmpty) {
       throw ArgumentError.value(recordId, 'recordId', 'must not be empty');
     }
+
     final record = await database.getRecord(recordId);
 
-    // Create a copy of the version to avoid modifying the existing record
     final version = record?.version != null
         ? VersionTracker(Map.from(record!.version.versions))
         : VersionTracker();
+
     version.increment(deviceId);
 
     final op = SyncOperation(
@@ -69,18 +62,18 @@ class SyncManager {
     await database.applyOperation(op);
   }
 
-  /// Delete a record (marks it as tombstone)
-  ///
-  /// The deletion is recorded and will be synced to cloud on next sync.
+  /// Deletes a record by applying a tombstone operation.
   Future<void> delete(String recordId) async {
     if (recordId.trim().isEmpty) {
       throw ArgumentError.value(recordId, 'recordId', 'must not be empty');
     }
+
     final record = await database.getRecord(recordId);
-    // Create a copy of the version to avoid modifying the existing record
+
     final version = record?.version != null
         ? VersionTracker(Map.from(record!.version.versions))
         : VersionTracker();
+
     version.increment(deviceId);
 
     final op = SyncOperation(
@@ -94,16 +87,15 @@ class SyncManager {
     await database.applyOperation(op);
   }
 
-  /// Synchronize with cloud: push local changes and pull remote changes
+  /// Runs one sync cycle.
   ///
-  /// This operation is idempotent and can be called multiple times safely.
-  /// Conflicts are automatically resolved using CRDT merge logic.
+  /// Safe to call repeatedly. If already syncing, call returns.
   Future<void> sync() async {
     if (_isSyncing) return;
     _isSyncing = true;
 
     try {
-      // Push local changes to cloud
+      // 1) Push local unsent operations.
       final unsent = await database.getUnsentOperations();
       if (unsent.isNotEmpty) {
         await cloud.push(unsent);
@@ -113,7 +105,7 @@ class SyncManager {
         }
       }
 
-      // Pull remote changes from cloud
+      // 2) Pull remote operations and apply unseen ones.
       final incoming = await cloud.pull();
 
       for (final op in incoming) {
@@ -126,6 +118,5 @@ class SyncManager {
     }
   }
 
-  /// Check if a sync is currently in progress
   bool get isSyncing => _isSyncing;
 }

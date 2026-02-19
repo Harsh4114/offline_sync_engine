@@ -1,28 +1,28 @@
 import '../models/sync_operation.dart';
 import '../models/sync_record.dart';
 
-/// Abstract interface for local database operations
+/// Abstraction for local persistence used by the sync engine.
 ///
-/// Implement this class to connect your local database (SQLite, Hive,
-/// SharedPreferences, etc.) with the offline sync engine.
-///
-/// Example implementations are provided in the example folder.
+/// Contract notes for implementers:
+/// - Methods should be durable (avoid losing operations on app restart/crash).
+/// - [markOperationSent] and [applyOperation] should be idempotent.
+/// - [isApplied] should be fast and reliable because it's used for dedupe.
 abstract class DatabaseAdapter {
-  /// Save a sync operation to the local database
+  /// Persists a sync operation locally.
   Future<void> saveOperation(SyncOperation operation);
 
-  /// Get all operations that haven't been sent to the cloud yet
+  /// Returns operations not marked as sent yet.
   Future<List<SyncOperation>> getUnsentOperations();
 
-  /// Mark an operation as successfully sent to the cloud
+  /// Marks operation as pushed successfully.
   Future<void> markOperationSent(String opId);
 
-  /// Check if an operation has already been applied locally
+  /// Returns true if operation was already applied locally.
   Future<bool> isApplied(String opId);
 
-  /// Apply an operation to update the local data
+  /// Applies operation to local record state.
   Future<void> applyOperation(SyncOperation operation);
 
-  /// Get a specific record by ID
+  /// Returns a single record by id, or null if missing.
   Future<SyncRecord?> getRecord(String id);
 }
