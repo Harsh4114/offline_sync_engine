@@ -109,10 +109,30 @@ void main() {
 
       final merged = r1.merge(r2);
 
-      // Both names present, last one wins in merge (from r2)
-      expect(merged.data.containsKey("name"), true);
+      // Overlapping field conflict is resolved deterministically.
+      expect(merged.data['name'], 'Alice');
       expect(merged.data["age"], 30);
       expect(merged.data["city"], "NYC");
+    });
+
+    test("concurrent merge with overlapping fields is commutative", () {
+      final r1 = SyncRecord(
+        id: "1",
+        data: {"name": "Alice", "city": "NYC"},
+        version: VersionTracker({"A": 1}),
+      );
+
+      final r2 = SyncRecord(
+        id: "1",
+        data: {"name": "Bob", "age": 30},
+        version: VersionTracker({"B": 1}),
+      );
+
+      final m1 = r1.merge(r2);
+      final m2 = r2.merge(r1);
+
+      expect(m1.data, m2.data);
+      expect(m1.data['name'], 'Alice');
     });
 
     test("tombstone propagates", () {
@@ -489,6 +509,34 @@ void main() {
 
       expect(opIds.length, 2);
       expect(opIds[0] != opIds[1], true);
+    });
+
+    test("rejects empty deviceId", () {
+      expect(
+        () => SyncManager(
+          database: InMemoryDatabaseAdapter(),
+          cloud: InMemoryCloudAdapter(),
+          deviceId: '   ',
+        ),
+        throwsArgumentError,
+      );
+    });
+
+    test("rejects empty recordId", () async {
+      final manager = SyncManager(
+        database: InMemoryDatabaseAdapter(),
+        cloud: InMemoryCloudAdapter(),
+        deviceId: 'A',
+      );
+
+      expect(
+        () => manager.createOrUpdate(' ', {'x': 1}),
+        throwsArgumentError,
+      );
+      expect(
+        () => manager.delete(' '),
+        throwsArgumentError,
+      );
     });
   });
 
