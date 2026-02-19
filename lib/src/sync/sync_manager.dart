@@ -1,50 +1,53 @@
-import 'dart:math';
 import '../models/sync_operation.dart';
 import '../models/version_tracker.dart';
 import '../storage/database_adapter.dart';
 import '../transport/cloud_adapter.dart';
 
-/// Main sync engine that manages offline-first data synchronization
+/// Main offline-first sync orchestrator.
 ///
-/// Handles conflict resolution using CRDT (Conflict-free Replicated Data Type)
-/// algorithms with vector clocks for deterministic merging across multiple devices.
-///
-/// Usage:
-/// ```dart
-/// final syncManager = SyncManager(
-///   database: myDatabaseAdapter,
-///   cloud: myCloudAdapter,
-///   deviceId: "device_123",
-/// );
-///
-/// await syncManager.createOrUpdate("user1", {"name": "John"});
-/// await syncManager.sync();
-/// ```
+/// Responsibilities:
+/// - create local operations
+/// - apply locally for instant offline UX
+/// - push unsent operations
+/// - pull remote operations and apply idempotently
 class SyncManager {
   final DatabaseAdapter database;
   final CloudAdapter cloud;
   final String deviceId;
 
   bool _isSyncing = false;
+  int _opCounter = 0;
 
   SyncManager({
     required this.database,
     required this.cloud,
     required this.deviceId,
-  });
-
-  String _generateOpId() {
-    return '${deviceId}_${DateTime.now().millisecondsSinceEpoch}_${Random().nextInt(1 << 16)}';
+  }) {
+    // Validation prevents accidental invalid manager setup.
+    if (deviceId.trim().isEmpty) {
+      throw ArgumentError.value(deviceId, 'deviceId', 'must not be empty');
+    }
   }
 
-  /// Create or update a record with the given data
+  /// Generates operation IDs with timestamp + local counter.
   ///
-  /// This operation is recorded and will be synced to the cloud on next sync.
-  Future<void> createOrUpdate(
-      String recordId, Map<String, dynamic> data) async {
+  /// This improves uniqueness for rapid consecutive writes.
+  String _generateOpId() {
+    _opCounter += 1;
+    return '${deviceId}_${DateTime.now().microsecondsSinceEpoch}_$_opCounter';
+  }
+
+  /// Creates or updates a record.
+  ///
+  /// The operation is persisted and applied locally immediately.
+  Future<void> createOrUpdate(String recordId, Map<String, dynamic> data) async {
+    if (recordId.trim().isEmpty) {
+      throw ArgumentError.value(recordId, 'recordId', 'must not be empty');
+    }
+
     final record = await database.getRecord(recordId);
 
-    // Create a copy of the version to avoid modifying the existing record
+    // Clone existing version so we do not mutate shared state accidentally.
     final version = record?.version != null
         ? VersionTracker(Map.from(record!.version.versions))
         : VersionTracker();
@@ -61,12 +64,14 @@ class SyncManager {
     await database.applyOperation(op);
   }
 
-  /// Delete a record (marks it as tombstone)
-  ///
-  /// The deletion is recorded and will be synced to cloud on next sync.
+  /// Deletes a record by applying a tombstone operation.
   Future<void> delete(String recordId) async {
+    if (recordId.trim().isEmpty) {
+      throw ArgumentError.value(recordId, 'recordId', 'must not be empty');
+    }
+
     final record = await database.getRecord(recordId);
-    // Create a copy of the version to avoid modifying the existing record
+
     final version = record?.version != null
         ? VersionTracker(Map.from(record!.version.versions))
         : VersionTracker();
@@ -83,16 +88,15 @@ class SyncManager {
     await database.applyOperation(op);
   }
 
-  /// Synchronize with cloud: push local changes and pull remote changes
+  /// Runs one sync cycle.
   ///
-  /// This operation is idempotent and can be called multiple times safely.
-  /// Conflicts are automatically resolved using CRDT merge logic.
+  /// Safe to call repeatedly. If a sync is already running, this call returns.
   Future<void> sync() async {
     if (_isSyncing) return;
     _isSyncing = true;
 
     try {
-      // Push local changes to cloud
+      // 1) Push local unsent operations.
       final unsent = await database.getUnsentOperations();
       if (unsent.isNotEmpty) {
         await cloud.push(unsent);
@@ -102,7 +106,7 @@ class SyncManager {
         }
       }
 
-      // Pull remote changes from cloud
+      // 2) Pull remote operations and apply unseen ones.
       final incoming = await cloud.pull();
 
       for (final op in incoming) {
@@ -115,6 +119,6 @@ class SyncManager {
     }
   }
 
-  /// Check if a sync is currently in progress
+  /// True while [sync] is in progress.
   bool get isSyncing => _isSyncing;
 }

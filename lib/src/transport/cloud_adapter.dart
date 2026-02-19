@@ -1,15 +1,14 @@
 import '../models/sync_operation.dart';
 
-/// Abstract interface for cloud/remote server communication
+/// Abstraction for remote/cloud transport.
 ///
-/// Implement this class to connect with your backend API, Firebase,
-/// Supabase, or any other cloud service.
-///
-/// Example implementations are provided in the example folder.
+/// Contract notes:
+/// - [push] should tolerate retries/duplicate operations.
+/// - [pull] may return already-seen operations; local dedupe is expected.
 abstract class CloudAdapter {
-  /// Push local operations to the cloud/server
+  /// Pushes local operations to server.
   Future<void> push(List<SyncOperation> operations);
 
-  /// Pull new operations from the cloud/server
+  /// Pulls operations from server.
   Future<List<SyncOperation>> pull();
 }

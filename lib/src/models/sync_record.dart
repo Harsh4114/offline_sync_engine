@@ -1,8 +1,6 @@
 import 'version_tracker.dart';
 
-/// Represents a synchronized data record with conflict resolution capabilities
-///
-/// Records can be merged deterministically when concurrent updates occur.
+/// Represents a synchronized record with merge/conflict resolution behavior.
 class SyncRecord {
   final String id;
   Map<String, dynamic> data;
@@ -16,11 +14,19 @@ class SyncRecord {
     this.tombstone = false,
   });
 
-  /// Merges this record with another, resolving conflicts deterministically
+  /// Merges this record with [other] deterministically.
   ///
-  /// If one version dominates, that version wins.
-  /// If versions are concurrent, data is merged.
+  /// Rules:
+  /// 1) Dominant version wins.
+  /// 2) Concurrent versions are merged with stable tie-break for overlaps.
+  /// 3) Tombstone propagates if either side is deleted.
   SyncRecord merge(SyncRecord other) {
+    if (id != other.id) {
+      throw ArgumentError(
+        'Cannot merge records with different ids: $id and ${other.id}',
+      );
+    }
+
     if (version.dominates(other.version)) {
       return this;
     }
@@ -29,9 +35,13 @@ class SyncRecord {
       return other;
     }
 
-    // Concurrent updates → deterministic merge
-    // Last-write-wins for each field, combined fields from both
-    final mergedData = {...data, ...other.data};
+    // Concurrent updates:
+    // choose a stable winner so merge remains deterministic/commutative.
+    final winner =
+        version.compareDeterministically(other.version) >= 0 ? this : other;
+    final loser = identical(winner, this) ? other : this;
+
+    final mergedData = <String, dynamic>{...loser.data, ...winner.data};
 
     final mergedVersion = VersionTracker({
       ...version.versions,
