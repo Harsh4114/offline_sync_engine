@@ -21,6 +21,10 @@ class SyncRecord {
   /// If one version dominates, that version wins.
   /// If versions are concurrent, data is merged.
   SyncRecord merge(SyncRecord other) {
+    if (id != other.id) {
+      throw ArgumentError('Cannot merge records with different ids: $id and ${other.id}');
+    }
+
     if (version.dominates(other.version)) {
       return this;
     }
@@ -29,9 +33,13 @@ class SyncRecord {
       return other;
     }
 
-    // Concurrent updates → deterministic merge
-    // Last-write-wins for each field, combined fields from both
-    final mergedData = {...data, ...other.data};
+    // Concurrent updates → deterministic merge.
+    // To keep merge commutative, pick a stable winner for overlapping keys.
+    final winner =
+        version.compareDeterministically(other.version) >= 0 ? this : other;
+    final loser = identical(winner, this) ? other : this;
+
+    final mergedData = <String, dynamic>{...loser.data, ...winner.data};
 
     final mergedVersion = VersionTracker({
       ...version.versions,
