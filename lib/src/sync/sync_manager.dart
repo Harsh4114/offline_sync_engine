@@ -23,15 +23,12 @@ class SyncManager {
     required this.cloud,
     required this.deviceId,
   }) {
-    // Validation prevents accidental invalid manager setup.
     if (deviceId.trim().isEmpty) {
       throw ArgumentError.value(deviceId, 'deviceId', 'must not be empty');
     }
   }
 
   /// Generates operation IDs with timestamp + local counter.
-  ///
-  /// This improves uniqueness for rapid consecutive writes.
   String _generateOpId() {
     _opCounter += 1;
     return '${deviceId}_${DateTime.now().microsecondsSinceEpoch}_$_opCounter';
@@ -39,18 +36,19 @@ class SyncManager {
 
   /// Creates or updates a record.
   ///
-  /// The operation is persisted and applied locally immediately.
-  Future<void> createOrUpdate(String recordId, Map<String, dynamic> data) async {
+  /// Operation is persisted locally and synced on next cycle.
+  Future<void> createOrUpdate(
+      String recordId, Map<String, dynamic> data) async {
     if (recordId.trim().isEmpty) {
       throw ArgumentError.value(recordId, 'recordId', 'must not be empty');
     }
 
     final record = await database.getRecord(recordId);
 
-    // Clone existing version so we do not mutate shared state accidentally.
     final version = record?.version != null
         ? VersionTracker(Map.from(record!.version.versions))
         : VersionTracker();
+
     version.increment(deviceId);
 
     final op = SyncOperation(
@@ -75,6 +73,7 @@ class SyncManager {
     final version = record?.version != null
         ? VersionTracker(Map.from(record!.version.versions))
         : VersionTracker();
+
     version.increment(deviceId);
 
     final op = SyncOperation(
@@ -90,7 +89,7 @@ class SyncManager {
 
   /// Runs one sync cycle.
   ///
-  /// Safe to call repeatedly. If a sync is already running, this call returns.
+  /// Safe to call repeatedly. If already syncing, call returns.
   Future<void> sync() async {
     if (_isSyncing) return;
     _isSyncing = true;
@@ -119,6 +118,5 @@ class SyncManager {
     }
   }
 
-  /// True while [sync] is in progress.
   bool get isSyncing => _isSyncing;
 }

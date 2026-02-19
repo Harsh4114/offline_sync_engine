@@ -18,7 +18,7 @@ class SyncRecord {
   ///
   /// Rules:
   /// 1) Dominant version wins.
-  /// 2) Concurrent versions are merged with stable tie-break for overlaps.
+  /// 2) Concurrent versions are merged deterministically.
   /// 3) Tombstone propagates if either side is deleted.
   SyncRecord merge(SyncRecord other) {
     if (id != other.id) {
@@ -35,8 +35,8 @@ class SyncRecord {
       return other;
     }
 
-    // Concurrent updates:
-    // choose a stable winner so merge remains deterministic/commutative.
+    // Concurrent updates → deterministic merge.
+    // To keep merge commutative, pick a stable winner for overlapping keys.
     final winner =
         version.compareDeterministically(other.version) >= 0 ? this : other;
     final loser = identical(winner, this) ? other : this;

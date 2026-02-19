@@ -24,7 +24,6 @@ class VersionTracker {
   }
 
   /// Returns true if this clock and [other] are concurrent.
-  ///
   /// Concurrent means neither dominates the other.
   bool isConcurrent(VersionTracker other) {
     var greater = false;
@@ -43,7 +42,7 @@ class VersionTracker {
     return greater && smaller;
   }
 
-  /// Returns a copied map to avoid accidental external mutation.
+  /// Returns an immutable JSON-safe copy of the current vector clock.
   Map<String, dynamic> toJson() => Map<String, int>.from(versions);
 
   factory VersionTracker.fromJson(Map<String, dynamic> json) {
@@ -53,12 +52,12 @@ class VersionTracker {
   @override
   String toString() => 'VersionTracker($versions)';
 
-  /// Stable comparison used as a deterministic tie-breaker.
+  /// Provides a stable ordering when two clocks are concurrent.
   ///
   /// Returns:
-  /// - > 0 if this should win
-  /// - < 0 if [other] should win
-  /// - 0 if equivalent
+  /// - positive if this tracker should win
+  /// - negative if [other] should win
+  /// - zero if equivalent
   int compareDeterministically(VersionTracker other) {
     final keys = <String>{...versions.keys, ...other.versions.keys}.toList()
       ..sort();
