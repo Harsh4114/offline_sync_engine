@@ -173,6 +173,20 @@ void main() {
       expect(m1.data, m2.data);
       expect(m1.version.versions, m2.version.versions);
     });
+
+    test("merge throws on different record ids", () {
+      final r1 = SyncRecord(
+        id: "1",
+        data: {},
+        version: VersionTracker(),
+      );
+      final r2 = SyncRecord(
+        id: "2",
+        data: {},
+        version: VersionTracker(),
+      );
+      expect(() => r1.merge(r2), throwsArgumentError);
+    });
   });
 
   group("SyncOperation Tests", () {
