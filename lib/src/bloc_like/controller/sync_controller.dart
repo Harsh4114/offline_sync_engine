@@ -33,6 +33,9 @@ class SyncController<T> {
         await repository.syncPending();
       } else if (event is RetryFailed<T>) {
         await repository.retryFailed();
+      } else {
+        throw UnsupportedError(
+            'Unsupported SyncEvent type: ${event.runtimeType}');
       }
 
       _emit(const SyncSuccess());
