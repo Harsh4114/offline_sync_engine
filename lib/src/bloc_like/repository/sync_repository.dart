@@ -11,6 +11,8 @@ class SyncRepository<T> {
   final SyncLogStore logStore;
   final EntityIdResolver<T> idResolver;
 
+  int _logCounter = 0;
+
   SyncRepository({
     required this.local,
     required this.cloud,
@@ -105,7 +107,7 @@ class SyncRepository<T> {
   }
 
   String _logId() {
-    final micros = DateTime.now().microsecondsSinceEpoch;
-    return 'sync_log_$micros';
+    _logCounter += 1;
+    return 'sync_log_${DateTime.now().microsecondsSinceEpoch}_$_logCounter';
   }
 }
