@@ -102,9 +102,11 @@ class SyncRepository<T> {
         return;
       case SyncOperationType.update:
         final data = await local.getById(log.entityId);
-        if (data != null) {
-          await cloud.update(data);
+        if (data == null) {
+          // Treat missing local data as an error so the log is marked as failed.
+          throw StateError('Cannot update: local entity not found for id ${log.entityId}');
         }
+        await cloud.update(data);
         return;
       case SyncOperationType.delete:
         await cloud.delete(log.entityId);
