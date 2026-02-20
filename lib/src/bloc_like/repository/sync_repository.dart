@@ -26,42 +26,68 @@ class SyncRepository<T> {
         id: _logId(),
         entityId: id,
         operation: SyncOperationType.create,
-        timestamp: DateTime.now(),
-        status: SyncStatus.pending,
-      ),
-    );
+    try {
+      await logStore.add(
+        SyncLog(
+          id: _logId(),
+          entityId: id,
+          operation: SyncOperationType.create,
+          timestamp: DateTime.now(),
+          status: SyncStatus.pending,
+        ),
+      );
+    } catch (_) {
+      // Roll back local insert if logging the sync intent fails.
+      await local.delete(id);
+      rethrow;
+    }
   }
 
   Future<void> update(T data) async {
     final id = idResolver(data);
+    // Capture previous state to allow rollback if logging fails.
+    final previous = await local.getById(id);
     await local.update(data);
-    await logStore.add(
-      SyncLog(
-        id: _logId(),
-        entityId: id,
-        operation: SyncOperationType.update,
-        timestamp: DateTime.now(),
-        status: SyncStatus.pending,
-      ),
-    );
+    try {
+      await logStore.add(
+        SyncLog(
+          id: _logId(),
+          entityId: id,
+          operation: SyncOperationType.update,
+          timestamp: DateTime.now(),
+          status: SyncStatus.pending,
+        ),
+      );
+    } catch (_) {
+      // Attempt to restore previous state if available.
+      if (previous != null) {
+        await local.update(previous);
+      }
+      rethrow;
+    }
   }
 
   Future<void> delete(String id) async {
-    final trimmedId = id.trim();
-    if (trimmedId.isEmpty) {
-      throw ArgumentError.value(id, 'id', 'Identifier must not be empty or whitespace');
+    // Capture the entity before deletion to allow rollback if logging fails.
+    final existing = await local.getById(id);
+    await local.delete(id);
+    try {
+      await logStore.add(
+        SyncLog(
+          id: _logId(),
+          entityId: id,
+          operation: SyncOperationType.delete,
+          timestamp: DateTime.now(),
+          status: SyncStatus.pending,
+        ),
+      );
+    } catch (_) {
+      // Attempt to restore the deleted entity if it previously existed.
+      if (existing != null) {
+        await local.insert(existing);
+      }
+      rethrow;
     }
-
-    await local.delete(trimmedId);
-    await logStore.add(
-      SyncLog(
-        id: _logId(),
-        entityId: trimmedId,
-        operation: SyncOperationType.delete,
-        timestamp: DateTime.now(),
-        status: SyncStatus.pending,
-      ),
-    );
   }
 
   Future<void> syncPending() async {
