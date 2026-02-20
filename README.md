@@ -145,7 +145,7 @@ Your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  offline_sync_engine: ^3.0.0
+  offline_sync_engine: ^latest_version
 ```
 
 Then run:
