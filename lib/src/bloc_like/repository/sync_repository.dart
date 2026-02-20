@@ -93,9 +93,12 @@ class SyncRepository<T> {
     switch (log.operation) {
       case SyncOperationType.create:
         final data = await local.getById(log.entityId);
-        if (data != null) {
-          await cloud.create(data);
+        if (data == null) {
+          throw StateError(
+            'Local data not found for create operation on entityId ${log.entityId}',
+          );
         }
+        await cloud.create(data);
         return;
       case SyncOperationType.update:
         final data = await local.getById(log.entityId);
