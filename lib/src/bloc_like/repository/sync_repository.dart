@@ -109,8 +109,9 @@ class SyncRepository<T> {
         await logStore.markSyncing(log.id);
         await _execute(log);
         await logStore.markSynced(log.id);
-      } catch (_) {
+      } catch (e, s) {
         await logStore.markFailed(log.id);
+        rethrow;
       }
     }
   }
