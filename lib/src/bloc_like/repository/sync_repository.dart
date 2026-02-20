@@ -47,11 +47,16 @@ class SyncRepository<T> {
   }
 
   Future<void> delete(String id) async {
-    await local.delete(id);
+    final trimmedId = id.trim();
+    if (trimmedId.isEmpty) {
+      throw ArgumentError.value(id, 'id', 'Identifier must not be empty or whitespace');
+    }
+
+    await local.delete(trimmedId);
     await logStore.add(
       SyncLog(
         id: _logId(),
-        entityId: id,
+        entityId: trimmedId,
         operation: SyncOperationType.delete,
         timestamp: DateTime.now(),
         status: SyncStatus.pending,
