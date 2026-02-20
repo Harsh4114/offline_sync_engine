@@ -46,6 +46,89 @@ It keeps data synchronized across devices with deterministic conflict resolution
 └────────────────────────┘  └────────────────────────┘
 ````
 
+
+## Bloc-Like Architecture (New)
+
+The package now supports a Bloc-like mental model for teams that prefer event/state flows with minimal boilerplate.
+
+| Bloc Concept | Package Equivalent |
+| --- | --- |
+| Event | `SyncEvent<T>` |
+| State | `SyncState` |
+| Bloc | `SyncController<T>` |
+| Repository | `SyncRepository<T>` |
+| Data source | `LocalDataSource<T>` + `CloudDataSource<T>` |
+| Queue store | `SyncLogStore` |
+
+### Contracts
+
+```dart
+abstract class LocalDataSource<T> {
+  Future<void> insert(T data);
+  Future<void> update(T data);
+  Future<void> delete(String id);
+  Future<T?> getById(String id);
+  Future<List<T>> getAll();
+}
+
+abstract class CloudDataSource<T> {
+  Future<void> create(T data);
+  Future<void> update(T data);
+  Future<void> delete(String id);
+  Future<T?> fetch(String id);
+  Future<List<T>> fetchAll();
+}
+```
+
+### Sync queue model
+
+```dart
+enum SyncOperationType { create, update, delete }
+enum SyncStatus { pending, syncing, synced, failed }
+```
+
+Each local write appends a `SyncLog`, then `StartSync` replays pending logs using latest-first ordering.
+
+### Events and states
+
+```dart
+AddData<T>, UpdateData<T>, DeleteData<T>, StartSync<T>, RetryFailed<T>
+SyncInitial, SyncInProgress, SyncSuccess, SyncFailure
+```
+
+### Recommended wiring
+
+```dart
+final repository = SyncRepository<User>(
+  local: localDataSource,
+  cloud: cloudDataSource,
+  logStore: InMemorySyncLogStore(),
+  idResolver: (user) => user.id,
+);
+
+final controller = SyncController<User>(repository: repository);
+final engine = OfflineSyncEngine<User>(controller: controller);
+
+await engine.add(user);
+await engine.sync();
+```
+
+### Architecture diagram
+
+```
+UI
+ ↓
+OfflineSyncEngine
+ ↓
+SyncController
+ ↓
+SyncRepository
+ ↓
+LocalDataSource   CloudDataSource
+        ↓
+     SyncLogStore
+```
+
 ## Installation
 
 ```bash
