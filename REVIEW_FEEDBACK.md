@@ -592,30 +592,30 @@ THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR I
 library offline_sync_engine;
 
 // Core Models
-export 'src/models/version_tracker.dart';
-export 'src/models/sync_record.dart';
-export 'src/models/sync_operation.dart';
+export 'src/models/version_tracker_model.dart';
+export 'src/models/sync_record_model.dart';
+export 'src/models/sync_operation_model.dart';
 
 // Adapters (implement these for your database and cloud)
-export 'src/storage/database_adapter.dart';
-export 'src/transport/cloud_adapter.dart';
+export 'src/storage/database_adapter_interface.dart';
+export 'src/transport/cloud_adapter_interface.dart';
 
 // Main Sync Manager
-export 'src/sync/sync_manager.dart';
+export 'src/sync/sync_manager_service.dart';
 
 // Built-in Implementations (ready to use)
-export 'src/implementations/in_memory_database.dart';
-export 'src/implementations/in_memory_cloud.dart';
+export 'src/implementations/in_memory_database_adapter.dart';
+export 'src/implementations/in_memory_cloud_adapter.dart';
 ```
 - effect (pros): Improves reliability, readability, and contributor onboarding.
 - effect (cons): More documentation/maintenance overhead and slightly higher development friction.
 
-## File Name: `lib/src/storage/database_adapter.dart`
+## File Name: `lib/src/storage/database_adapter_interface.dart`
 - improvements: Document transactional expectations, ordering guarantees, and idempotency requirements for custom adapters.
 - full updated code of that particular file:
 ```dart
-import '../models/sync_operation.dart';
-import '../models/sync_record.dart';
+import '../models/sync_operation_model.dart';
+import '../models/sync_record_model.dart';
 
 /// Abstract interface for local database operations
 ///
@@ -646,7 +646,7 @@ abstract class DatabaseAdapter {
 - effect (pros): Improves reliability, readability, and contributor onboarding.
 - effect (cons): More documentation/maintenance overhead and slightly higher development friction.
 
-## File Name: `lib/src/models/version_tracker.dart`
+## File Name: `lib/src/models/version_tracker_model.dart`
 - improvements: Prefer immutable map exposure in public APIs and include additional tests for edge-case clock comparisons.
 - full updated code of that particular file:
 ```dart
@@ -727,11 +727,11 @@ class VersionTracker {
 - effect (pros): Improves reliability, readability, and contributor onboarding.
 - effect (cons): More documentation/maintenance overhead and slightly higher development friction.
 
-## File Name: `lib/src/models/sync_operation.dart`
+## File Name: `lib/src/models/sync_operation_model.dart`
 - improvements: Consider schema versioning and deep-copying payload for stronger immutability guarantees.
 - full updated code of that particular file:
 ```dart
-import 'version_tracker.dart';
+import 'version_tracker_model.dart';
 
 /// Represents a single sync operation (create, update, or delete)
 ///
@@ -778,11 +778,11 @@ class SyncOperation {
 - effect (pros): Improves reliability, readability, and contributor onboarding.
 - effect (cons): More documentation/maintenance overhead and slightly higher development friction.
 
-## File Name: `lib/src/models/sync_record.dart`
+## File Name: `lib/src/models/sync_record_model.dart`
 - improvements: Clarify merge policy for same-key concurrent writes and consider per-field timestamp metadata in future versions.
 - full updated code of that particular file:
 ```dart
-import 'version_tracker.dart';
+import 'version_tracker_model.dart';
 
 /// Represents a synchronized data record with conflict resolution capabilities
 ///
@@ -846,13 +846,13 @@ class SyncRecord {
 - effect (pros): Improves reliability, readability, and contributor onboarding.
 - effect (cons): More documentation/maintenance overhead and slightly higher development friction.
 
-## File Name: `lib/src/implementations/in_memory_database.dart`
+## File Name: `lib/src/implementations/in_memory_database_adapter.dart`
 - improvements: Add optional compaction/pruning helpers and deterministic ordering for unsent operation retrieval.
 - full updated code of that particular file:
 ```dart
-import '../models/sync_operation.dart';
-import '../models/sync_record.dart';
-import '../storage/database_adapter.dart';
+import '../models/sync_operation_model.dart';
+import '../models/sync_record_model.dart';
+import '../storage/database_adapter_interface.dart';
 
 /// In-memory implementation of DatabaseAdapter
 ///
@@ -929,12 +929,12 @@ class InMemoryDatabaseAdapter implements DatabaseAdapter {
 - effect (pros): Improves reliability, readability, and contributor onboarding.
 - effect (cons): More documentation/maintenance overhead and slightly higher development friction.
 
-## File Name: `lib/src/implementations/in_memory_cloud.dart`
+## File Name: `lib/src/implementations/in_memory_cloud_adapter.dart`
 - improvements: Add incremental pull support (cursor/since token) to model real server behavior and reduce full-history pulls.
 - full updated code of that particular file:
 ```dart
-import '../models/sync_operation.dart';
-import '../transport/cloud_adapter.dart';
+import '../models/sync_operation_model.dart';
+import '../transport/cloud_adapter_interface.dart';
 
 /// In-memory implementation of CloudAdapter that simulates a cloud server
 ///
@@ -973,11 +973,11 @@ class InMemoryCloudAdapter implements CloudAdapter {
 - effect (pros): Improves reliability, readability, and contributor onboarding.
 - effect (cons): More documentation/maintenance overhead and slightly higher development friction.
 
-## File Name: `lib/src/transport/cloud_adapter.dart`
+## File Name: `lib/src/transport/cloud_adapter_interface.dart`
 - improvements: Evolve interface to support incremental sync, auth context, and retry/backoff signaling.
 - full updated code of that particular file:
 ```dart
-import '../models/sync_operation.dart';
+import '../models/sync_operation_model.dart';
 
 /// Abstract interface for cloud/remote server communication
 ///
@@ -996,14 +996,14 @@ abstract class CloudAdapter {
 - effect (pros): Improves reliability, readability, and contributor onboarding.
 - effect (cons): More documentation/maintenance overhead and slightly higher development friction.
 
-## File Name: `lib/src/sync/sync_manager.dart`
+## File Name: `lib/src/sync/sync_manager_service.dart`
 - improvements: Add retry/backoff hooks and sync result reporting (`pushed`, `pulled`, `failed`) for observability.
 - full updated code of that particular file:
 ```dart
-import '../models/sync_operation.dart';
-import '../models/version_tracker.dart';
-import '../storage/database_adapter.dart';
-import '../transport/cloud_adapter.dart';
+import '../models/sync_operation_model.dart';
+import '../models/version_tracker_model.dart';
+import '../storage/database_adapter_interface.dart';
+import '../transport/cloud_adapter_interface.dart';
 
 /// Main sync engine that manages offline-first data synchronization
 ///

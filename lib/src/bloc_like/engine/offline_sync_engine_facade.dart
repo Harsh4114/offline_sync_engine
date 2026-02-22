@@ -1,6 +1,6 @@
-import '../controller/sync_controller.dart';
-import '../events/sync_event.dart';
-import '../states/sync_state.dart';
+import '../controller/sync_controller_service.dart';
+import '../events/sync_event_models.dart';
+import '../states/sync_state_models.dart';
 
 class OfflineSyncEngine<T> {
   final SyncController<T> _controller;

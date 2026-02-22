@@ -1,7 +1,7 @@
-import '../contracts/cloud_data_source.dart';
-import '../contracts/local_data_source.dart';
-import '../contracts/sync_log_store.dart';
-import '../models/sync_log.dart';
+import '../contracts/cloud_data_source_contract.dart';
+import '../contracts/local_data_source_contract.dart';
+import '../contracts/sync_log_store_contract.dart';
+import '../models/sync_log_model.dart';
 
 typedef EntityIdResolver<T> = String Function(T value);
 

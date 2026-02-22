@@ -1,5 +1,5 @@
-import '../models/sync_operation.dart';
-import '../transport/cloud_adapter.dart';
+import '../models/sync_operation_model.dart';
+import '../transport/cloud_adapter_interface.dart';
 
 /// In-memory implementation of CloudAdapter that simulates a cloud server
 ///

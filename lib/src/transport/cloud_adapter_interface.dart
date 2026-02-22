@@ -1,4 +1,4 @@
-import '../models/sync_operation.dart';
+import '../models/sync_operation_model.dart';
 
 /// Abstraction for remote/cloud transport.
 ///

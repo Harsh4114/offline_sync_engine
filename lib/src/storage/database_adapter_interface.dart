@@ -1,5 +1,5 @@
-import '../models/sync_operation.dart';
-import '../models/sync_record.dart';
+import '../models/sync_operation_model.dart';
+import '../models/sync_record_model.dart';
 
 /// Abstraction for local persistence used by the sync engine.
 ///
