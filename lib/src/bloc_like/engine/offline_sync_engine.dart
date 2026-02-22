@@ -18,9 +18,9 @@ class OfflineSyncEngine<T> {
 
   Future<void> delete(String id) => _controller.handle(DeleteData<T>(id));
 
-  Future<void> sync() => _controller.handle(const StartSync<T>());
+  Future<void> sync() => _controller.handle(StartSync<T>());
 
-  Future<void> retryFailed() => _controller.handle(const RetryFailed<T>());
+  Future<void> retryFailed() => _controller.handle(RetryFailed<T>());
 
   Future<void> dispose() => _controller.dispose();
 }
