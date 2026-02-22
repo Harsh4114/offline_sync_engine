@@ -21,11 +21,6 @@ class SyncRepository<T> {
   Future<void> add(T data) async {
     final id = idResolver(data);
     await local.insert(data);
-    await logStore.add(
-      SyncLog(
-        id: _logId(),
-        entityId: id,
-        operation: SyncOperationType.create,
     try {
       await logStore.add(
         SyncLog(
