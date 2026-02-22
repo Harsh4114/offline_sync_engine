@@ -1,5 +1,5 @@
-import '../models/sync_log.dart';
-import 'sync_log_store.dart';
+import '../models/sync_log_model.dart';
+import 'sync_log_store_contract.dart';
 
 class InMemorySyncLogStore implements SyncLogStore {
   final List<SyncLog> _logs = [];

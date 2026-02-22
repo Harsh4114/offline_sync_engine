@@ -1,4 +1,4 @@
-import 'version_tracker.dart';
+import 'version_tracker_model.dart';
 
 /// Represents a single sync operation (create, update, or delete)
 ///

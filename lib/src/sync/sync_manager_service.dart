@@ -1,7 +1,7 @@
-import '../models/sync_operation.dart';
-import '../models/version_tracker.dart';
-import '../storage/database_adapter.dart';
-import '../transport/cloud_adapter.dart';
+import '../models/sync_operation_model.dart';
+import '../models/version_tracker_model.dart';
+import '../storage/database_adapter_interface.dart';
+import '../transport/cloud_adapter_interface.dart';
 
 /// Main offline-first sync orchestrator.
 ///

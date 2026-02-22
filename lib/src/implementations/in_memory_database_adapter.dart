@@ -1,6 +1,6 @@
-import '../models/sync_operation.dart';
-import '../models/sync_record.dart';
-import '../storage/database_adapter.dart';
+import '../models/sync_operation_model.dart';
+import '../models/sync_record_model.dart';
+import '../storage/database_adapter_interface.dart';
 
 /// In-memory implementation of DatabaseAdapter
 ///

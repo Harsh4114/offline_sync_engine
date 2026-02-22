@@ -1,8 +1,8 @@
 import 'dart:async';
 
-import '../events/sync_event.dart';
-import '../repository/sync_repository.dart';
-import '../states/sync_state.dart';
+import '../events/sync_event_models.dart';
+import '../repository/sync_repository_service.dart';
+import '../states/sync_state_models.dart';
 
 class SyncController<T> {
   final SyncRepository<T> repository;
