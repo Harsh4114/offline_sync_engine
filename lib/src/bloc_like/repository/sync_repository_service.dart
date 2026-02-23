@@ -104,7 +104,7 @@ class SyncRepository<T> {
         await logStore.markSyncing(log.id);
         await _execute(log);
         await logStore.markSynced(log.id);
-      } catch (e, s) {
+      } catch (e) {
         await logStore.markFailed(log.id);
         rethrow;
       }
@@ -126,7 +126,8 @@ class SyncRepository<T> {
         final data = await local.getById(log.entityId);
         if (data == null) {
           // Treat missing local data as an error so the log is marked as failed.
-          throw StateError('Cannot update: local entity not found for id ${log.entityId}');
+          throw StateError(
+              'Cannot update: local entity not found for id ${log.entityId}');
         }
         await cloud.update(data);
         return;
