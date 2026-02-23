@@ -5,7 +5,6 @@
 [![GitHub: harsh4114](https://img.shields.io/badge/GitHub-harsh4114-black?logo=github)](https://github.com/harsh4114)
 [![Contribute](https://img.shields.io/badge/Contributions-Welcome-green?logo=github)](https://github.com/Harsh4114/offline_sync_engine/issues)
 
-**Author:** [@harsh4114](https://github.com/harsh4114)
 
 ---
 
