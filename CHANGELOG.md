@@ -5,13 +5,36 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [3.1.0] - 2026-02-19
+## [4.0.0]
+### Added
+- **Bloc-like architecture** - New event/state based mental model for predictable and testable data flows.
+- `SyncController<T>` - Bloc-like controller managing sync events and states.
+- `SyncRepository<T>` - Central repository coordinating local and cloud data sources.
+- `SyncLog` - Dedicated sync queue model for operation tracking.
+- `LocalDataSource<T>` and `CloudDataSource<T>` - Clean contracts for data access layers.
+- `SyncLogStore` - Abstract store for managing sync operations queue.
+- `InMemorySyncLogStore` - Ready-to-use in-memory implementation.
+- `OfflineSyncEngine<T>` - New facade for simple bloc-like integration.
+- Comprehensive examples for Bloc-like architecture patterns.
+- Enhanced test suite for new architecture components.
+
+### Changed
+- Folder structure reorganization for better modularity and clarity:
+  - `bloc_like/` - New top-level directory containing contracts, implementations, models, and services.
+  - `models/`, `storage/`, `sync/` - Reorganized for better logical grouping.
+- Documentation updated to showcase both traditional and Bloc-like approaches.
+- Updated minimum SDK to `>=3.0.0 <4.0.0` to leverage latest Dart features and ensure compatibility with modern Flutter versions.
+
+### Deprecated
+- Original `SyncManager` API still functional but superseded by `OfflineSyncEngine<T>` for new projects.
+
+## [3.1.0]
 
 ### Changed
 - Documentation updates for clarity and accuracy.
 - Refined guides and examples to match latest project structure.
 
-## [3.0.0] - 2026-02-19
+## [3.0.0]
 
 ### Added
 - Clearer inline comments and API docs in core sync files to improve maintainability.
@@ -28,19 +51,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Safer vector clock serialization by returning a copied map in `VersionTracker.toJson()`.
 - Guard added to prevent merging records with different IDs.
 
-## [2.4.0] - 2026-02-18
+## [2.4.0]
 
 ### Changed
 - Documentation updates for clarity and accuracy.
 - Refined guides and examples to match latest project structure.
 
-## [2.3.0] - 2026-02-18
+## [2.3.0]
 
 ### Changed
 - Documentation updates for clarity and accuracy.
 - Refined guides and examples to match latest project structure.
 
-## [2.2.0] - 2026-02-18
+## [2.2.0]
 
 ### Added
 - Updated README.md with new repository URL (https://github.com/Harsh4114/offline_sync_engine).
@@ -52,7 +75,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Repository, homepage, and documentation URLs updated in pubspec.yaml.
 - Improved package metadata for better discoverability.
 
-## [2.1.0] - 2026-02-10
+## [2.1.0]
 
 ### Added
 - Multi-device example demonstrating cross-device synchronization.
@@ -70,7 +93,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Edge cases in vector clock comparison.
 - Memory leak in in-memory implementations during long-running operations.
 
-## [2.0.0] - 2026-01-25
+## [2.0.0]
 
 ### Added
 - **BREAKING**: Built-in implementations (InMemoryDatabaseAdapter and InMemoryCloudAdapter).
@@ -95,7 +118,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 - **BREAKING**: Legacy API methods (deprecated in v1.2.0).
 
-## [1.0.0] - 2025-10-15
+## [1.0.0]
 
 ### Added
 - Initial release of Offline Sync Engine.
@@ -111,6 +134,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - MIT License.
 - Initial documentation and README.
 
+[4.0.0]: https://github.com/Harsh4114/offline_sync_engine/releases/tag/v4.0.0
+[3.1.0]: https://github.com/Harsh4114/offline_sync_engine/releases/tag/v3.1.0
 [3.0.0]: https://github.com/Harsh4114/offline_sync_engine/releases/tag/v3.0.0
 [2.4.0]: https://github.com/Harsh4114/offline_sync_engine/releases/tag/v2.4.0
 [2.3.0]: https://github.com/Harsh4114/offline_sync_engine/releases/tag/v2.3.0

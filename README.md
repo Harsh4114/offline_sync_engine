@@ -2,9 +2,26 @@
 
 [![Pub Version](https://img.shields.io/pub/v/offline_sync_engine)](https://pub.dev/packages/offline_sync_engine)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+[![GitHub: harsh4114](https://img.shields.io/badge/GitHub-harsh4114-black?logo=github)](https://github.com/harsh4114)
+[![Contribute](https://img.shields.io/badge/Contributions-Welcome-green?logo=github)](https://github.com/Harsh4114/offline_sync_engine/issues)
+
+**Author:** [@harsh4114](https://github.com/harsh4114)
+
+---
 
 Offline-first CRDT-based sync engine for Flutter and Dart applications.
 It keeps data synchronized across devices with deterministic conflict resolution.
+
+## 🤝 Join the Collaboration
+
+We welcome developers of all levels to contribute! Whether you're looking to:
+- 🐛 **Report bugs** or suggest features
+- 📝 **Improve documentation**
+- 🔧 **Add custom adapters**
+- ✨ **Enhance the codebase**
+- 🎯 **Share your use cases**
+
+**[Open an Issue](https://github.com/Harsh4114/offline_sync_engine/issues)** or **[Submit a PR](https://github.com/Harsh4114/offline_sync_engine)** to help make this package even better for everyone!
 
 ## Features
 
