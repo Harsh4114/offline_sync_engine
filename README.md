@@ -36,31 +36,8 @@ We welcome developers of all levels to contribute! Whether you're looking to:
 
 
 ## Architecture
+<img width="800" height="800" alt="image" src="https://github.com/user-attachments/assets/8a198350-72e0-4e67-bb5b-775441a0b5b1" />
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                        Your App                             │
-└────────────────────┬────────────────────────────────────────┘
-                     │
-                     ▼
-┌─────────────────────────────────────────────────────────────┐
-│                     SyncManager                             │
-│  - createOrUpdate()                                         │
-│  - delete()                                                 │
-│  - sync()                                                   │
-└────────────┬────────────────────────┬───────────────────────┘
-             │                        │
-             ▼                        ▼
-┌────────────────────────┐  ┌────────────────────────┐
-│   DatabaseAdapter      │  │    CloudAdapter        │
-│  (Your Implementation) │  │  (Your Implementation) │
-│                        │  │                        │
-│  - SQLite              │  │  - REST API            │
-│  - Hive                │  │  - Firebase            │
-│  - SharedPreferences   │  │  - Supabase            │
-│  - ObjectBox           │  │  - GraphQL             │
-└────────────────────────┘  └────────────────────────┘
-````
 
 
 ## Bloc-Like Architecture (New)
