@@ -1,0 +1,45 @@
+name: Publish Flutter Package
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: stable
+
+      - name: Install Dependencies
+        run: flutter pub get
+
+      - name: Verify Package
+        run: flutter pub publish --dry-run
+
+      - name: Setup Pub Credentials
+        env:
+          PUB_TOKEN: ${{ secrets.PUB_DEV_TOKEN }}
+        run: |
+          mkdir -p ~/.pub-cache
+
+          cat <<EOF > ~/.pub-cache/credentials.json
+          {
+            "hosted": [
+              {
+                "url": "https://pub.dev",
+                "token": "$PUB_TOKEN"
+              }
+            ]
+          }
+          EOF
+
+      - name: Publish Package
+        run: flutter pub publish --force
