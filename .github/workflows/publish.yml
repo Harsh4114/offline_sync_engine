@@ -1,4 +1,4 @@
-name: Publish Flutter Package
+name: Publish Package
 
 on:
   push:
@@ -7,6 +7,10 @@ on:
 
 jobs:
   publish:
+    permissions:
+      id-token: write
+      contents: read
+
     runs-on: ubuntu-latest
 
     steps:
@@ -18,31 +22,11 @@ jobs:
         with:
           channel: stable
 
-      - name: Flutter Version
-        run: flutter --version
-
       - name: Install Dependencies
         run: flutter pub get
 
       - name: Verify Package
         run: flutter pub publish --dry-run
 
-      - name: Setup Pub Credentials
-        env:
-          PUB_TOKEN: ${{ secrets.PUB_DEV_TOKEN }}
-        run: |
-          mkdir -p ~/.pub-cache
-
-          cat <<EOF > ~/.pub-cache/credentials.json
-          {
-            "hosted": [
-              {
-                "url": "https://pub.dev",
-                "token": "$PUB_TOKEN"
-              }
-            ]
-          }
-          EOF
-
       - name: Publish Package
-        run: flutter pub publish --force
+        run: dart pub publish --force
